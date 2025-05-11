@@ -7,7 +7,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from library.support_method import random_email_generator, random_password_generator
 
 def test_happy_path_create_account(create_webdriver):
-    """This test will open the website and create account of user"""
+   """This test will open the website and create account of user
+    steps 
+    1: click on create account button
+    2. enter the email address created using faker
+    3. enter the password created using faker
+    4. click on submit button
+    5. verify log out text visible"""
     driver = create_webdriver
     wait = WebDriverWait(driver, 20)
     login_locator = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@class="Mnd902 KZnnKM tKTPp2"]')))
