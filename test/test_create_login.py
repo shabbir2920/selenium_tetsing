@@ -5,6 +5,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from library.support_method import random_email_generator, random_password_generator
+from library.pages.home_page import HomePage
+from library.pages.login_page import LoginPage
+from library.pages.account_page import AccountPage
+
 
 def test_happy_path_create_account(create_webdriver):
     """This test will open the website and create account of user
@@ -14,34 +18,41 @@ def test_happy_path_create_account(create_webdriver):
     3. enter the password created using faker
     4. click on submit button"""
     driver = create_webdriver
-    wait = WebDriverWait(driver, 20)
-    login_locator = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@data-testid="login-banner-cta"]')))
-    login_locator.click()
-    login_locator_2 = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@data-testid="login-modal-email-button"]')))
-    login_locator_2.click()
-    email_locator = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@id='email']")))
-    email_locator.send_keys(random_email_generator())
-    driver.find_element(By.XPATH, "//button[@data-testid='login-next-button']").click()
-    password_locator = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@type='password']")))
-    password_locator.send_keys(random_password_generator())
-    driver.find_element(By.XPATH, "//button[text()='Create account']").click()
-    time.sleep(10)
-    skip_Setting = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='ehv1KY tjDLq2 Gp_pWr']")))
-    skip_Setting.click()
-    account = wait.until(EC.element_to_be_clickable
-                         ((By.XPATH, "//div[@data-testid='desktop-dropdown-menu']/descendant::span")))
-    action = ActionChains(driver)
-    action.move_to_element(account).perform()
-    logout = driver.find_element(By.XPATH, "//button[@data-testid='profile-menu-logout']/descendant::span[3]")
-    assert logout.text == "Log out", f"test failed as account not created"
+    # Use page objects
+    home = HomePage(driver)
+    login = LoginPage(driver)
+    account = AccountPage(driver)
+
+    # Open home (conftest already opens, but calling open is idempotent)
+    home.open()
+
+    # Navigate to login / create flow
+    home.click_login_banner()
+    home.click_email_login()
+
+    email = random_email_generator()
+    login.enter_email(email)
+    login.click_next()
+
+    password = random_password_generator()
+    login.enter_password(password)
+    login.click_create_account()
+
+    # Wait a moment for account creation flow to finish and skip settings
+    time.sleep(5)
+    account.skip_settings()
+
+    # Hover over account and assert logout is present
+    account.hover_account()
+    logout_text = account.get_logout_text()
+    assert logout_text == "Log out", "test failed as account not created"
 
 
 def test_happy_path_login_account(create_webdriver):
-    """This test will open the website and login account of user
-        steps
-        1: click on create account button
-        2. enter the email address created using faker
-        3. enter the password created using faker
-        4. click on submit button"""
+    """Placeholder for login test using saved credentials in credentials/.
 
-
+    Implementers can read credentials/username.txt and credentials/password.txt
+    and drive the login path using the same page objects. Kept separate so account
+    creation and login responsibilities are isolated.
+    """
+    pass

@@ -1,25 +1,33 @@
 from faker import Faker
+from pathlib import Path
+
+CREDS_DIR = Path("credentials")
+CREDS_DIR.mkdir(exist_ok=True)
 
 
-def random_email_generator():
-    """this method will create dummy email_id
-    using faker library"""
+def random_email_generator(save_to_file: bool = True) -> str:
+    """Create a dummy gmail email using faker and optionally save to credentials/username.txt
+
+    Returns the generated email string.
+    """
     dummy = Faker()
-    dummy_email = dummy.email(safe=True, domain='gmail.com')
-    with open("credentials_username.txt", "w") as file:
-        file.write(f"the username is - {dummy_email}")
-        file.close()
-    print(f"the email id of user is {dummy_email}")
+    dummy_email = dummy.email(domain='gmail.com')
+    if save_to_file:
+        with open(CREDS_DIR / "username.txt", "w") as file:
+            file.write(dummy_email)
+    print(f"generated email: {dummy_email}")
     return dummy_email
 
 
-def random_password_generator():
-    """this method will create dummy password
-    using faker library"""
+def random_password_generator(save_to_file: bool = True) -> str:
+    """Create a dummy password using faker and optionally save to credentials/password.txt
+
+    Returns the generated password string.
+    """
     dummy = Faker()
-    dummy_password = dummy.password(length=10, special_chars=True, upper_case=True)
-    with open("credentials_password.txt", "w") as file:
-        file.write(f"the password is - {dummy_password}")
-        file.close()
-    print(f"the password of user is {dummy_password}")
+    dummy_password = dummy.password(length=12, special_chars=True, upper_case=True)
+    if save_to_file:
+        with open(CREDS_DIR / "password.txt", "w") as file:
+            file.write(dummy_password)
+    print(f"generated password: {dummy_password}")
     return dummy_password
